@@ -66,6 +66,25 @@ namespace pc {
                     case sf::Event::Closed:
                         window_->close();
                         break;
+                    case sf::Event::KeyReleased:
+                        switch (event.key.code) {
+                            case sf::Keyboard::Escape:
+                                window_->close();
+                                break;
+                            case sf::Keyboard::Down:
+                                cube.swipe_down();
+                                break;
+                            case sf::Keyboard::Up:
+                                cube.swipe_up();
+                                break;
+                            case sf::Keyboard::Left:
+                                cube.swipe_left();
+                                break;
+                            case sf::Keyboard::Right:
+                                cube.swipe_right();
+                                break;
+                        }
+                        break;
                     case sf::Event::MouseButtonPressed:
                         is_dragging = true;
                         drag_start.x = event.mouseButton.x;
@@ -78,15 +97,15 @@ namespace pc {
                         dir = drag_end - drag_start;
                         if (abs(dir.x) > abs(dir.y)) {
                             if (dir.x < 0) {
-                                cube.swipe_left(drag_start, drag_end);
+                                cube.swipe_left();
                             } else {
-                                cube.swipe_right(drag_start, drag_end);
+                                cube.swipe_right();
                             }
                         } else {
                             if (dir.y < 0) {
-                                cube.swipe_up(drag_start, drag_end);
+                                cube.swipe_up();
                             } else {
-                                cube.swipe_down(drag_start, drag_end);
+                                cube.swipe_down();
                             }
                         }
                         break;

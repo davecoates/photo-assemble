@@ -8,10 +8,20 @@
 namespace pc {
 
     class PhotoCube : public sf::Drawable,  public sf::Transformable {
+
+        enum struct Direction {
+            LEFT,
+            RIGHT,
+            UP,
+            DOWN
+        };
+
         private:
             sf::VertexArray face_;
             sf::VertexArray grid_;
             sf::VertexArray squares_;
+
+            sf::Vertex *empty_square_;
 
             //std::vector<sf::Transform> square_transforms_;
 
@@ -22,15 +32,18 @@ namespace pc {
 
             virtual void draw(sf::RenderTarget& target, sf::RenderStates) const;
 
+            sf::Vertex* get_neighbour_square(sf::Vertex *square, const Direction &dir);
+            bool swap_empty_square(const Direction &dir);
+
         public:
             PhotoCube(unsigned int width, unsigned int height, unsigned int x_count, unsigned int y_count);
 
             void update(const sf::Time &t);
 
-            void swipe_left(sf::Vector2i start, sf::Vector2i end);
-            void swipe_right(sf::Vector2i start, sf::Vector2i end);
-            void swipe_up(sf::Vector2i start, sf::Vector2i end);
-            void swipe_down(sf::Vector2i start, sf::Vector2i end);
+            void swipe_left();
+            void swipe_right();
+            void swipe_up();
+            void swipe_down();
 
     };
 
