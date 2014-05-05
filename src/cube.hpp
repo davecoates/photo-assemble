@@ -7,23 +7,32 @@
 
 namespace pc {
 
+        typedef const unsigned short int Direction;
+        static constexpr Direction LEFT = 0, RIGHT = 1, UP = 2, DOWN = 3;
     class PhotoCube : public sf::Drawable,  public sf::Transformable {
 
-        enum struct Direction {
-            LEFT,
-            RIGHT,
-            UP,
-            DOWN
+
+        struct Tile {
+            sf::VertexArray quad_;
+
+            // Neighbours when in correct order
+            Tile* neighbours_[4];
+
+            // Neighbours based on current order
+            Tile* current_neighbours_[4];
+
+            sf::Transform transform_;
+
+
+            Tile();
         };
 
         private:
-            sf::VertexArray face_;
-            sf::VertexArray grid_;
-            sf::VertexArray squares_;
+            std::vector<Tile> tiles_;
 
-            sf::Vertex *empty_square_;
+            sf::VertexArray preview_;
 
-            //std::vector<sf::Transform> square_transforms_;
+            Tile *empty_tile_;
 
             sf::Texture texture_;
 
@@ -32,8 +41,11 @@ namespace pc {
 
             virtual void draw(sf::RenderTarget& target, sf::RenderStates) const;
 
-            sf::Vertex* get_neighbour_square(sf::Vertex *square, const Direction &dir);
-            bool swap_empty_square(const Direction &dir);
+            bool swap_empty_tile(const Direction &dir);
+
+            sf::Vector2f get_slide_transform(const Direction &dir);
+
+            void swap_neighbours(Tile* target, Tile *find, Tile *replace);
 
         public:
             PhotoCube(unsigned int width, unsigned int height, unsigned int x_count, unsigned int y_count);
