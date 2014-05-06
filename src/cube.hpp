@@ -4,28 +4,14 @@
 
 #include <vector>
 
+#include "tile.hpp"
+
 
 namespace pc {
 
-        typedef const unsigned short int Direction;
-        static constexpr Direction LEFT = 0, RIGHT = 1, UP = 2, DOWN = 3;
+
     class PhotoCube : public sf::Drawable,  public sf::Transformable {
 
-
-        struct Tile {
-            sf::VertexArray quad_;
-
-            // Neighbours when in correct order
-            Tile* neighbours_[4];
-
-            // Neighbours based on current order
-            Tile* current_neighbours_[4];
-
-            sf::Transform transform_;
-
-
-            Tile();
-        };
 
         private:
             std::vector<Tile> tiles_;

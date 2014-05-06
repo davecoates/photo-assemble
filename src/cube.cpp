@@ -1,19 +1,10 @@
 #include "cube.hpp"
+#include "tile.hpp"
 
 #include <iostream>
 #include <random>
 
 namespace pc {
-
-    PhotoCube::Tile::Tile() {
-        quad_.setPrimitiveType(sf::Quads);
-        quad_.resize(4);
-
-        for (unsigned int i = 0;i < 4;i++) {
-            neighbours_[i] = nullptr;
-            current_neighbours_[i] = nullptr;
-        }
-    }
 
     PhotoCube::PhotoCube(unsigned int width, unsigned int height, unsigned int x_count, unsigned int y_count) 
         : width_(width), height_(height), x_count_(x_count), y_count_(y_count) 
@@ -54,31 +45,10 @@ namespace pc {
         for (unsigned int i = 0; i < x_count; i++) {
             for (unsigned int j = 0; j < y_count; j++) {
                 auto index = i*x_count + j;
-                auto x = quad_w * i, y = quad_h * j;
                 auto &tile = tiles_[index];
-                tile.quad_[0].position = sf::Vector2f(x,y);
-                tile.quad_[1].position = sf::Vector2f(x+quad_w,y);
-                tile.quad_[2].position = sf::Vector2f(x+quad_w,y+quad_h);
-                tile.quad_[3].position = sf::Vector2f(x,y+quad_h);
-
-                x = tex_quad_w * i, y = tex_quad_h * j;
-                tile.quad_[0].texCoords = sf::Vector2f(x,y);
-                tile.quad_[1].texCoords = sf::Vector2f(x+tex_quad_w,y);
-                tile.quad_[2].texCoords = sf::Vector2f(x+tex_quad_w,y+tex_quad_h); 
-                tile.quad_[3].texCoords = sf::Vector2f(x,y+tex_quad_h); 
-
-                if (i > 0) {
-                    tile.neighbours_[LEFT] = &tiles_[index-1];
-                }
-                if (i < x_count - 1) {
-                    tile.neighbours_[RIGHT] = &tiles_[index+1];
-                }
-                if (j > 0) {
-                    tile.neighbours_[UP] = &tiles_[index-y_count_];
-                }
-                if (j < x_count - 1) {
-                    tile.neighbours_[DOWN] = &tiles_[index+y_count_];
-                }
+                auto pos = sf::Vector2f(quad_w * i, quad_h * j);
+                auto tex_pos = sf::Vector2f(tex_quad_w * i, tex_quad_h * j); 
+                tile.init(pos, quad_w, quad_h, tex_pos, tex_quad_w, tex_quad_h);
             }
         }
 
@@ -94,18 +64,17 @@ namespace pc {
                 auto index = i*x_count + j;;
                 auto &tile = tiles_[index];
 
-                // Setup current neighbours
                 if (j > 0) {
-                    tile.current_neighbours_[LEFT] = &tiles_[index-1];
+                    tile.set_neighbour(LEFT, &tiles_[index-1]);
                 }
                 if (j < x_count - 1) {
-                    tile.current_neighbours_[RIGHT] = &tiles_[index+1];
+                    tile.set_neighbour(RIGHT, &tiles_[index+1]);
                 }
                 if (i > 0) {
-                    tile.current_neighbours_[UP] = &tiles_[index-x_count_];
+                    tile.set_neighbour(UP, &tiles_[index-x_count_]);
                 }
                 if (i < x_count - 1) {
-                    tile.current_neighbours_[DOWN] = &tiles_[index+x_count_];
+                    tile.set_neighbour(DOWN, &tiles_[index+x_count_]);
                 }
 
                 // Don't need to transform empty tile
@@ -114,10 +83,7 @@ namespace pc {
                 // This is the randomised position of the tile
                 auto x = quad_w * j, y = quad_h * i;
                 // This is the actual position of the tile
-                auto position = tiles_[index].quad_[0].position;
-                // This transforms the tile so it matches the randomised pos
-                auto t_x = x - position.x, t_y = y - position.y;
-                tile.transform_.translate(t_x, t_y);
+                tile.translate_to(sf::Vector2f(x, y));
             }
         }
     }
@@ -128,16 +94,17 @@ namespace pc {
         for (unsigned int i = 0; i < x_count_ * y_count_;i++) {
             const auto &tile = tiles_[i];
             sf::RenderStates state;
-            state.transform = tile.transform_;
+            state.transform = states.transform;
             if (&tile != empty_tile_) {
                 state.texture = &texture_;
             }
-            target.draw(tile.quad_, state);
+            tile.draw(target, state);
+            //target.draw(tile.quad_, state);
         }
 
-        //states.transform.scale(10, 10);
-        //states.transform.translate(-1.f * (width_), -1.f * (height_));
-        //target.draw(preview_, states);
+        states.transform = sf::Transform();
+        states.transform.scale(200, 200);
+        target.draw(preview_, states);
     }
 
     sf::Vector2f PhotoCube::get_slide_transform(const Direction &dir) {
@@ -177,16 +144,18 @@ namespace pc {
             return false;
         }
         auto t = get_slide_transform(dir);
-        src->transform_.translate(t.x, t.y);
+        src->translate(sf::Vector2f(t.x, t.y));
 
-        empty_tile_->transform_.translate(-t.x, -t.y);
+        empty_tile_->translate(-sf::Vector2f(t.x, t.y));
 
+        empty_tile_->swap_neighbours(src);
+        src->swap_neighbours(empty_tile_);
         for (unsigned int i = 0; i < 4; i++) {
             // Update all neighbouring pointers for both tiles
-            swap_neighbours(empty_tile_->current_neighbours_[i], empty_tile_, src);
-            swap_neighbours(src->current_neighbours_[i], src, empty_tile_);
+            //swap_neighbours(empty_tile_->current_neighbours_[i], empty_tile_, src);
+            //swap_neighbours(src->current_neighbours_[i], src, empty_tile_);
 
-            // Swap tiles making sure they aren't their own neighbour
+            // Update all neighbouring pointers for both tiles
             auto ptr = empty_tile_->current_neighbours_[i];
             empty_tile_->current_neighbours_[i] = src->current_neighbours_[i];
             if (empty_tile_->current_neighbours_[i] == empty_tile_) {

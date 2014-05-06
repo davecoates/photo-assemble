@@ -34,7 +34,7 @@ namespace pc {
 
         auto cube_w = 300, cube_h= 300;
 
-        PhotoCube cube(cube_w, cube_h, 5, 5);
+        PhotoCube cube(cube_w, cube_h, 3, 3);
 
         sf::Transform center_transform;
         center_transform.translate(width/2 - cube_w/2, height/2 - cube_h/2);

@@ -1,4 +1,4 @@
-SRCS = main.cpp app.cpp cube.cpp
+SRCS = main.cpp app.cpp cube.cpp tile.cpp
 OBJS = $(SRCS:%.cpp=../obj/%.o)
 LDFLAGS =-framework sfml-graphics -framework sfml-window -framework sfml-system 
 CXXFLAGS = -c -Wall -Wextra -std=c++11
