@@ -29,10 +29,13 @@ namespace pc {
             // Width and height of tile and width and height of texture 
             uint width_, height_, tex_width_, tex_height_;
 
+            // Is this tile in it's correct position?
             bool is_home_ = false;
 
-            // Is this tile in it's correct position?
-            bool check_is_home();
+            void draw_border(sf::RenderTarget& target, sf::RenderStates states, const Direction &dir) const;
+
+            void update_neighbour(Tile *find, Tile *replace);
+
 
         public:
 
@@ -63,8 +66,6 @@ namespace pc {
             void set_neighbour(Direction dir, Tile* n) {
                 current_neighbours_[dir] = n;
             }
-
-            void update_neighbour(Tile *find, Tile *replace);
 
             // Calls update_neighbour on each of this tiles current neighbours.
             // This is to tell them that this tile has changed it's position so

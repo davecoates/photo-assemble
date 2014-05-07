@@ -16,13 +16,6 @@ namespace pc {
         }
     }
 
-    bool Tile::check_is_home() {
-        auto t = transform_.transformPoint(quad_[0].position.x, quad_[0].position.y); 
-
-        is_home_ = t == quad_[0].position;
-        return is_home_;
-    }
-
     void Tile::init(sf::Vector2f pos, uint w, uint h, sf::Vector2f tex_pos, uint tex_w, uint tex_h) 
     {
         width_ = w;
@@ -86,7 +79,10 @@ namespace pc {
 
     void Tile::translate(sf::Vector2f t) {
         transform_.translate(t.x, t.y);
-        check_is_home();
+
+        auto p = transform_.transformPoint(quad_[0].position.x, quad_[0].position.y); 
+
+        is_home_ = (p == quad_[0].position);
     }
 
     void Tile::swap_neighbours(Tile* new_tile) {
@@ -107,22 +103,27 @@ namespace pc {
 
     }
 
+    void Tile::draw_border(sf::RenderTarget& target, sf::RenderStates states, const Direction &dir) const {
+        uint index;
+        switch (dir) {
+            case UP: index = 0; break;
+            case LEFT: index = 4; break;
+            case RIGHT: index = 8; break;
+            case DOWN: index = 12; break;
+        }
+
+        if (current_neighbours_[dir] && !(is_home_ && current_neighbours_[dir]->is_home())) {
+            target.draw(&border_[index], 4, sf::PrimitiveType::Quads, states);
+        }
+    }
+
     void Tile::draw(sf::RenderTarget& target, sf::RenderStates states) const {
         states.transform.combine(transform_);
         target.draw(quad_, states);
-        if (!current_neighbours_[LEFT] || !(is_home_ && current_neighbours_[LEFT]->is_home())) {
-            target.draw(&border_[4], 4, sf::PrimitiveType::Quads, states);
-        }
-        if (!current_neighbours_[UP] || !(is_home_ && current_neighbours_[UP]->is_home())) {
-            target.draw(&border_[0], 4, sf::PrimitiveType::Quads, states);
-        }
-        if (!current_neighbours_[RIGHT] || !(is_home_ && current_neighbours_[DOWN]->is_home())) {
-            target.draw(&border_[8], 4, sf::PrimitiveType::Quads, states);
-        }
-        if (!current_neighbours_[DOWN] || !(is_home_ && current_neighbours_[DOWN]->is_home())) {
-            target.draw(&border_[12], 4, sf::PrimitiveType::Quads, states);
-        }
-
+        draw_border(target, states, LEFT);
+        draw_border(target, states, RIGHT);
+        draw_border(target, states, DOWN);
+        draw_border(target, states, UP);
     }
 
 }
