@@ -29,7 +29,10 @@ namespace pc {
             // Width and height of tile and width and height of texture 
             uint width_, height_, tex_width_, tex_height_;
 
-            bool is_home = false;
+            bool is_home_ = false;
+
+            // Is this tile in it's correct position?
+            bool check_is_home();
 
         public:
 
@@ -53,8 +56,7 @@ namespace pc {
             // Translate tile by specific amount
             void translate(sf::Vector2f t);
 
-            // Is this tile in it's correct position?
-            bool check_is_home();
+            bool is_home() { return is_home_; }
 
             void draw_border(sf::RenderTarget& target, sf::RenderStates) const;
 
