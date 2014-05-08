@@ -19,8 +19,15 @@ namespace pc {
         if (!texture_.loadFromFile("../resources/trafalgar_square.jpg")) {
             throw std::runtime_error("Failed to load image");
         }
+        texture_.setSmooth(true);
 
         auto img_size = texture_.getSize();
+
+        if (img_size.x > img_size.y) {
+            texture_.loadFromFile("../resources/trafalgar_square.jpg", sf::IntRect(0, 0, img_size.y, img_size.y));
+            img_size = texture_.getSize();
+            std::cout << img_size.x << " " << img_size.y << "<===\n";
+        }
 
         preview_.setPrimitiveType(sf::Quads);
         preview_.resize(4);
@@ -77,15 +84,22 @@ namespace pc {
                     tile.set_neighbour(DOWN, &tiles_[index+x_count_]);
                 }
 
-                // Don't need to transform empty tile
-                //if (&tile == empty_tile_) continue;
-
                 // This is the randomised position of the tile
                 auto x = quad_w * j, y = quad_h * i;
                 // This is the actual position of the tile
                 tile.translate_to(sf::Vector2f(x, y));
             }
         }
+    }
+
+    bool PhotoCube::is_complete() 
+    {
+        for (unsigned int i = 0; i < x_count_ * y_count_;i++) {
+            if (!tiles_[i].is_home()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     void PhotoCube::draw(sf::RenderTarget& target, sf::RenderStates states) const

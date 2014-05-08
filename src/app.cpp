@@ -34,7 +34,7 @@ namespace pc {
 
         auto cube_w = 300, cube_h= 300;
 
-        PhotoCube cube(cube_w, cube_h, 3, 3);
+        PhotoCube cube(cube_w, cube_h, 4, 4);
 
         sf::Transform center_transform;
         center_transform.translate(width/2 - cube_w/2, height/2 - cube_h/2);
@@ -114,6 +114,10 @@ namespace pc {
                         break;
                 }
 
+            }
+
+            if (cube.is_complete()) {
+                // TODO:
             }
 
             window_->clear(sf::Color::White);

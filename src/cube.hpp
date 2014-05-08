@@ -38,6 +38,8 @@ namespace pc {
 
             void update(const sf::Time &t);
 
+            bool is_complete();
+
             void swipe_left();
             void swipe_right();
             void swipe_up();
